@@ -3,11 +3,18 @@ import pandas as pd
 import sqlite3
 from datetime import datetime
 import bcrypt
+from PIL import Image
 
-# ====================== CONFIGURAÇÃO ======================
+# ====================== CONFIGURAÇÃO COM LOGO ======================
+# Carrega o logo que você subiu
+try:
+    logo = Image.open("logo.png")
+except FileNotFoundError:
+    logo = "🛠️"  # emoji de backup caso o logo não carregue
+
 st.set_page_config(
     page_title="LTI Inventory",
-    page_icon="🛠️",
+    page_icon=logo,           # Seu logo aparece como ícone da aba do navegador
     layout="wide"
 )
 
@@ -238,6 +245,7 @@ elif menu == "Visualizar Ativos":
     
     col1, col2 = st.columns(2)
     col1.download_button("📥 Baixar CSV", df.to_csv(index=False), "ativos.csv", "text/csv")
+    
     with pd.ExcelWriter("ativos.xlsx", engine="openpyxl") as writer:
         df.to_excel(writer, index=False)
     with open("ativos.xlsx", "rb") as f:
