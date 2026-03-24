@@ -6,15 +6,14 @@ import bcrypt
 from PIL import Image
 
 # ====================== CONFIGURAÇÃO COM LOGO ======================
-# Carrega o logo que você subiu
 try:
     logo = Image.open("logo.png")
 except FileNotFoundError:
-    logo = "🛠️"  # emoji de backup caso o logo não carregue
+    logo = "🛠️"
 
 st.set_page_config(
     page_title="LTI Inventory",
-    page_icon=logo,           # Seu logo aparece como ícone da aba do navegador
+    page_icon=logo,
     layout="wide"
 )
 
@@ -70,6 +69,23 @@ init_db()
 
 def get_connection():
     return sqlite3.connect(DB_NAME)
+
+# ====================== CRIAÇÃO AUTOMÁTICA DO USUÁRIO ADMIN ======================
+def criar_usuario_admin():
+    conn = get_connection()
+    c = conn.cursor()
+    try:
+        password_hash = bcrypt.hashpw("admin123".encode('utf-8'), bcrypt.gensalt())
+        c.execute("""INSERT INTO usuarios (nome, setor, username, password_hash) 
+                     VALUES (?, ?, ?, ?)""", 
+                  ("Administrador", "TI", "admin", password_hash))
+        conn.commit()
+        st.toast("✅ Usuário admin criado: admin / admin123", icon="🔑")
+    except sqlite3.IntegrityError:
+        pass  # usuário já existe
+    conn.close()
+
+criar_usuario_admin()
 
 # ====================== LOGIN ======================
 if "logged_in" not in st.session_state:
@@ -278,5 +294,5 @@ elif menu == "Relatórios":
     st.subheader("Ativos por Tipo")
     st.dataframe(pd.read_sql("SELECT tipo, COUNT(*) as quantidade FROM ativos GROUP BY tipo", conn))
     conn.close()
-    
+
 st.sidebar.info("LTI Inventory v3.0 - Versão Web")
