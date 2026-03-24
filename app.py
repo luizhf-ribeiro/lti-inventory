@@ -278,4 +278,5 @@ elif menu == "Relatórios":
     st.subheader("Ativos por Tipo")
     st.dataframe(pd.read_sql("SELECT tipo, COUNT(*) as quantidade FROM ativos GROUP BY tipo", conn))
     conn.close()
+    
 st.sidebar.info("LTI Inventory v3.0 - Versão Web")
